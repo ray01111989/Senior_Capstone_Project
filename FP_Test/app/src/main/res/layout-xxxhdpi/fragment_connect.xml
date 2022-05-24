@@ -1,0 +1,121 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/frameLayout4"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#EDECEC"
+    tools:context=".Connect">
+
+    <androidx.appcompat.widget.Toolbar
+        android:id="@+id/connectToolbar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="35dp"
+        android:background="#40531C"
+        android:minHeight="?attr/actionBarSize"
+        android:theme="?attr/actionBarTheme"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:title="@string/AD"
+        app:titleTextColor="#F57F17" />
+
+    <EditText
+        android:id="@+id/ipAddress"
+        android:layout_width="261dp"
+        android:layout_height="51dp"
+        android:width="250dp"
+        android:background="@drawable/borders"
+        android:ems="10"
+        android:hint="@string/ip_address"
+        android:importantForAutofill="no"
+        android:inputType="textPersonName"
+        android:textAlignment="center"
+        android:textColor="#000000"
+        android:textColorHint="#A3A1A1"
+        android:textSize="20sp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias=".50"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.20"
+        tools:ignore="HardcodedText" />
+
+    <EditText
+        android:id="@+id/portNumber"
+        android:layout_width="261dp"
+        android:layout_height="51dp"
+        android:width="250dp"
+        android:background="@drawable/borders"
+        android:ems="10"
+        android:hint="@string/port"
+        android:importantForAutofill="no"
+        android:inputType="number|textPersonName"
+        android:textAlignment="center"
+        android:textColor="#000000"
+        android:textColorHint="#FFA3A1A1"
+        android:textSize="20sp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.50"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.30"
+        tools:ignore="HardcodedText" />
+
+
+    <Button
+        android:id="@+id/disconnectButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:backgroundTint="#40531C"
+        android:onClick="closeClient"
+        android:text="Disconnect"
+        android:textAllCaps="false"
+        android:textColor="#F57F17"
+        android:textSize="25sp"
+        app:cornerRadius="30dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.497"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.576"
+        tools:ignore="HardcodedText" />
+
+    <Button
+        android:id="@+id/connectButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:backgroundTint="#40531C"
+        android:onClick="onClickConnectionInfo"
+        android:text="@string/Connect"
+        android:textAllCaps="false"
+        android:textColor="#F57F17"
+        android:textSize="25sp"
+        app:cornerRadius="30dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.443"
+        tools:ignore="HardcodedText" />
+
+    <ImageView
+        android:id="@+id/mainBackground"
+        android:layout_width="35dp"
+        android:layout_height="56dp"
+        android:background="#40531C"
+        android:src="@drawable/ic_baseline_arrow_back_24"
+        android:tint="#F57F17"
+        android:onClick="onClickConnectToMain"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:ignore="UseAppTint" />
+
+
+
+</androidx.constraintlayout.widget.ConstraintLayout>

@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/frameLayout2"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#EDECEC"
+    tools:context=".License">
+
+    <ImageView
+        android:id="@+id/backButtonLicensing"
+        android:layout_width="35dp"
+        android:layout_height="56dp"
+        android:background="#40531C"
+        android:src="@drawable/ic_baseline_arrow_back_24"
+        android:tint="#F57F17"
+        android:onClick="onClickLicenseToMain"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:ignore="UseAppTint" />
+
+    <LinearLayout
+        android:id="@+id/linearLayout"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <androidx.appcompat.widget.Toolbar
+            android:id="@+id/licenseToolbar"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="35dp"
+            android:background="#40531C"
+            android:minHeight="?attr/actionBarSize"
+            android:theme="?attr/actionBarTheme"
+            app:title="@string/Licensing"
+            app:titleTextColor="#F57F17" />
+
+        <TextView
+            android:id="@+id/licenseType"
+            android:layout_width="match_parent"
+            android:layout_height="30dp"
+            android:background="#EDECEC"
+            android:gravity="center"
+            android:text="@string/license"
+            android:textColor="#000000"
+            android:textSize="20sp"
+            android:textStyle="bold"
+            tools:ignore="HardcodedText" />
+
+        <TextView
+            android:id="@+id/LicenseDescription"
+            android:layout_width="match_parent"
+            android:layout_height="380dp"
+            android:background="#EDECEC"
+            android:gravity="center"
+            android:text='@string/license_content'
+            android:textColor="#000000"
+            android:textSize="20sp"
+            tools:ignore="HardcodedText" />
+
+        <TextView
+            android:id="@+id/copyrightClaim"
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:layout_marginTop="1dp"
+            android:background="#EDECEC"
+            android:gravity="center"
+            android:text="@string/copyright"
+            android:textColor="#000000"
+            android:textSize="19sp"
+            android:textStyle="italic|bold"
+            tools:ignore="HardcodedText" />
+
+    </LinearLayout>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

@@ -1,0 +1,146 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/my_nav"
+    app:startDestination="@id/main">
+
+    <fragment
+        android:id="@+id/main"
+        android:name="com.example.fp_test.Main"
+        android:label="fragment_main"
+        tools:layout="@layout/fragment_main" >
+        <action
+            android:id="@+id/action_main_to_credits"
+            app:destination="@id/credits" />
+        <action
+            android:id="@+id/action_main_to_license"
+            app:destination="@id/license" />
+        <action
+            android:id="@+id/action_main_to_data"
+            app:destination="@id/data" />
+        <action
+            android:id="@+id/action_main_to_manage"
+            app:destination="@id/manage" />
+        <action
+            android:id="@+id/action_main_to_connect"
+            app:destination="@id/connect" />
+    </fragment>
+    <fragment
+        android:id="@+id/credits"
+        android:name="com.example.fp_test.Credits"
+        android:label="fragment_credits"
+        tools:layout="@layout/fragment_credits" >
+        <action
+            android:id="@+id/action_credits_to_main"
+            app:destination="@id/main" />
+    </fragment>
+    <fragment
+        android:id="@+id/license"
+        android:name="com.example.fp_test.License"
+        android:label="fragment_license"
+        tools:layout="@layout/fragment_license" >
+        <action
+            android:id="@+id/action_license_to_main"
+            app:destination="@id/main" />
+    </fragment>
+    <fragment
+        android:id="@+id/data"
+        android:name="com.example.fp_test.Data"
+        android:label="fragment_data"
+        tools:layout="@layout/fragment_data" >
+        <action
+            android:id="@+id/action_data_to_main"
+            app:destination="@id/main" />
+        <action
+            android:id="@+id/action_data_to_graph"
+            app:destination="@id/thermometer" />
+        <action
+            android:id="@+id/action_data_to_soilsensor"
+            app:destination="@id/soilsensor" />
+        <action
+            android:id="@+id/action_data_to_lightsensor"
+            app:destination="@id/lightsensor" />
+        <action
+            android:id="@+id/action_data_to_hygrometer"
+            app:destination="@id/hygrometer" />
+        <action
+            android:id="@+id/action_data_to_fertilizer"
+            app:destination="@id/fertilizer" />
+        <action
+            android:id="@+id/action_data_to_watersensor"
+            app:destination="@id/watersensor" />
+    </fragment>
+    <fragment
+        android:id="@+id/manage"
+        android:name="com.example.fp_test.Manage"
+        android:label="fragment_manage"
+        tools:layout="@layout/fragment_manage" >
+        <action
+            android:id="@+id/action_manage_to_main"
+            app:destination="@id/main" />
+    </fragment>
+    <fragment
+        android:id="@+id/connect"
+        android:name="com.example.fp_test.Connect"
+        android:label="fragment_connect"
+        tools:layout="@layout/fragment_connect" >
+        <action
+            android:id="@+id/action_connect_to_main"
+            app:destination="@id/main" />
+    </fragment>
+    <fragment
+        android:id="@+id/thermometer"
+        android:name="com.example.fp_test.graph"
+        android:label="fragment_graph"
+        tools:layout="@layout/fragment_graph" >
+        <action
+            android:id="@+id/action_graph_to_data"
+            app:destination="@id/data" />
+    </fragment>
+    <fragment
+        android:id="@+id/watersensor"
+        android:name="com.example.fp_test.watersensor"
+        android:label="fragment_watersensor"
+        tools:layout="@layout/fragment_watersensor" >
+        <action
+            android:id="@+id/action_watersensor_to_data"
+            app:destination="@id/data" />
+    </fragment>
+    <fragment
+        android:id="@+id/soilsensor"
+        android:name="com.example.fp_test.soilsensor"
+        android:label="fragment_soilsensor"
+        tools:layout="@layout/fragment_soilsensor" >
+        <action
+            android:id="@+id/action_soilsensor_to_data"
+            app:destination="@id/data" />
+    </fragment>
+    <fragment
+        android:id="@+id/lightsensor"
+        android:name="com.example.fp_test.lightsensor"
+        android:label="fragment_lightsensor"
+        tools:layout="@layout/fragment_lightsensor" >
+        <action
+            android:id="@+id/action_lightsensor_to_data"
+            app:destination="@id/data" />
+    </fragment>
+    <fragment
+        android:id="@+id/hygrometer"
+        android:name="com.example.fp_test.hygrometer"
+        android:label="fragment_hygrometer"
+        tools:layout="@layout/fragment_hygrometer" >
+        <action
+            android:id="@+id/action_hygrometer_to_data"
+            app:destination="@id/data" />
+    </fragment>
+    <fragment
+        android:id="@+id/fertilizer"
+        android:name="com.example.fp_test.Fertilizer"
+        android:label="fragment_fertilizer"
+        tools:layout="@layout/fragment_fertilizer" >
+        <action
+            android:id="@+id/action_fertilizer_to_data"
+            app:destination="@id/data" />
+    </fragment>
+</navigation>

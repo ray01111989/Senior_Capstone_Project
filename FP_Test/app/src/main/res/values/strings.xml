@@ -1,0 +1,61 @@
+<resources>
+    <string name="app_name">FP_Test</string>
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="copyright">Copyright © 2022 Washington State University - Vancouver</string>
+    <string name="license">MIT License</string>
+    <string name="license_content">Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "software"), to deal in the software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the software, and to permit persons to whom the software is furnished to do so, subject to the following conditions:  the above copyright notice and this permission notice shall be included in all copies or substantial portions of the software.  the software is provided "as is", without warranty of any kind, express or implied, including but not limited to the warranties of merchantability, fitness for a particular purpose and noninfringement. in no event shall the authors or copyright holders be liable for any claim, damages or other liability, whether in an action of contract, tort or otherwise, arising from, out of or in connection with the software or the use or other dealings in the software.</string>
+    <string name="ip_address">IP Address</string>
+    <string name="port">Port</string>
+    <string name="WaterSensor">Water Sensor</string>
+    <string name="graph">graph</string>
+    <string name="soilSensor">Soil Sensor</string>
+    <string name="manage">Manage</string>
+    <string name="dispense">Dispense</string>
+    <string name="waterDispenser">WaterDispenser</string>
+    <string name="waterdispenser">Water Dispenser</string>
+    <string name="mainMenu">Main Menu</string>
+    <string name="connect">connect</string>
+    <string name="Manage">manage</string>
+    <string name="data">data</string>
+    <string name="licensing">licensing</string>
+    <string name="credits">credits</string>
+    <string name="lightSensor">Light Sensor</string>
+    <string name="Licensing">Licensing</string>
+    <string name="hygroMeter">Hygrometer</string>
+    <string name="thermo">Thermometer</string>
+    <string name="fert">Fertilizer</string>
+    <string name="AD">Arduino Connection</string>
+    <string name="Connect">Connect</string>
+    <string name="Disconnect">Disconnect</string>
+    <string name="Devs">Developers</string>
+    <string name="Glenn">Glenn Beckers III</string>
+    <string name="Rawad">Rawad Bader</string>
+    <string name="Jared">Jared Kangas</string>
+    <string name="Yuhao">Yuhao Liu</string>
+    <string name="Henry">Henry Unruh</string>
+    <string name="SB">Sponsored By</string>
+    <string name="Hakan">Dr. Hakan Gurocak</string>
+    <string name="Credits">Credits</string>
+    <string name="Data">Data</string>
+    <string name="Watersensor">WaterSensor</string>
+
+    <string-array name="Time_Measures">
+        <item>Seconds</item>
+        <item>Minutes</item>
+        <item>Hours</item>
+    </string-array>
+
+    <string-array name="Water_Dispensed">
+        <item>1 mL</item>
+        <item>2 mL</item>
+        <item>3 mL</item>
+    </string-array>
+
+    <string-array name="Time_Nums">
+        <item>15</item>
+        <item>30</item>
+        <item>45</item>
+        <item>60</item>
+    </string-array>
+</resources>
