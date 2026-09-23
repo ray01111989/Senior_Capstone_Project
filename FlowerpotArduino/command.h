@@ -2,6 +2,7 @@
 #define COMMAND_H_
 
 #include <stdbool.h>
+#include <string.h>
 
 #include "network.h"
 
@@ -164,20 +165,30 @@ static inline bool handleCommand(ClientT client, uint32_t timeoutMs,
   static const char errResponse[] = { 2, STATUS_ERR };
 
   char buf[MAX_CMD_LENGTH + 1] = {0};
-  const byte cmdBytes = client.read();
 
-  if (cmdBytes >= sizeof buf - 1) {
+  // The first byte of a request is the length of the whole message, including this byte. It is read
+  // into an int because read() returns -1 when nothing could be read.
+  const int firstByte = client.read();
+
+  // Reject a missing length, a length of 0 and a message that does not fit in buf BEFORE reading anything
+  // else. A length of 0 used to slip through: "cmdBytes - 1" became -1, which converts to a huge size, and
+  // read() then copied everything the client sent into the 21-byte buf (a stack buffer overflow that any
+  // client on the network could trigger).
+  if (firstByte < 1 || firstByte >= (int)(sizeof buf - 1)) {
     client.write(errResponse, errResponse[0]);
     client.flush();
     return false;
   }
 
+  const byte cmdBytes = (byte)firstByte;
+
+  // read the rest of the message: cmdBytes - 1 bytes (the length byte itself was already read)
   const int bytesRead = client.read(buf, cmdBytes - 1);
   LOG_DEBUG("Raw command: ");
-  printHexBuf(buf, cmdBytes - 1);
+  printHexBuf(buf, bytesRead > 0 ? (size_t)bytesRead : 0);
 
-  // reject commands with invalid sizes and empty commands
-  if (bytesRead != cmdBytes - 1 || cmdBytes == 0) {
+  // reject commands that were shorter than they announced
+  if (bytesRead != cmdBytes - 1) {
     client.write(errResponse, errResponse[0]);
     client.flush();
     return false;
@@ -194,7 +205,8 @@ static inline bool handleCommand(ClientT client, uint32_t timeoutMs,
     return false;
   }
 
-  const uint8_t qty = (cmdBytes > 1) ? buf[1] : 0;
+  // the quantity is the byte after the command, if the message has one
+  const uint8_t qty = (bytesRead > 1) ? buf[1] : 0;
 
   LOG_DEBUG("Handling command: ");
   LOG_DEBUG((char)cmd);
@@ -202,11 +214,14 @@ static inline bool handleCommand(ClientT client, uint32_t timeoutMs,
   LOG_DEBUG(qty);
   LOG_DEBUG(")\n");
 
-  float data;
+  // start at 0 so that a command that does not set the value (for example an unknown command) never sends
+  // uninitialized memory back to the client
+  float data = 0.0f;
   const ServerStatus responseStatus = process_cmd(cmd, qty, &data);
 
-  // set the length to 2 by default -- length and status
-  memcpy(buf, 0, sizeof buf);
+  // set the length to 2 by default -- length and status.
+  // (This used to be memcpy(buf, 0, ...), which copies FROM address 0 instead of clearing the buffer.)
+  memset(buf, 0, sizeof buf);
   buf[0] = 2;
   buf[1] = responseStatus;
 

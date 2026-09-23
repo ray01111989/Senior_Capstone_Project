@@ -35,8 +35,11 @@
  *
  *  - Byte 0: The length of the message, including Byte 0.
  *  - Byte 1: The command to perform, as defined in command.h's `enum Command`.
- *  - Byte 3: An 8-bit parameter for the command. Meaning depends on the command; see
+ *  - Byte 2: An 8-bit parameter for the command. Meaning depends on the command; see
  *            command.h for more documentation.
+ *
+ * The server does no authentication or encryption, so anyone who can reach its address and port
+ * can send commands. Only run it on a network you trust.
  *
  * Responses are returned by the Arduino, and are formatted as follows:
  *
@@ -51,7 +54,7 @@
  * Using WiFi
  * ----------
  *
- * If ENABLE_WIFI is set to 1 in config.h, the following additional macros are expected to
+ * If ENABLE_WIFI is defined in config.h, the following additional macros are expected to
  * be defined in a file called secrets.h as string literals:
  *
  *  - WIFI_SSID -- The access point SSID to connect to.
