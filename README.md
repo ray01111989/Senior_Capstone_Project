@@ -12,6 +12,22 @@ This project's goal is to create an Internet-of-Things (IoT) flowerpot that can 
 
 The system maintained by the CS team is small and can likely be managed by one or two people. The `FlowerpotArduino` directory contains the source code for this, with `FlowerpotArduino.ino` being the main file. The source code is well-documented with information about its dependencies, configuration options, and the structure of the networking protocol used to communicate with the app.
 
+## Security Notes
+
+- The Arduino server has **no authentication or encryption**. Anyone who can reach its IP address and port (2259 by default) can read the sensors and start a water dispense (a single request is limited to a quantity of 3). Run it only on a network you trust, and do not expose the port to the internet.
+- WiFi credentials belong in `FlowerpotArduino/secrets.h`, which is ignored by git. Never commit it.
+- `handleCommand()` in `command.h` checks the length byte of every request before reading the rest of the message. An earlier version accepted a length of 0, which let any client on the network overflow a buffer on the Arduino.
+
+## Tests
+
+The message parsing in `command.h` can be tested on a computer, without an Arduino. From the `FlowerpotArduino` directory run:
+
+```bash
+sh tests/run_tests.sh
+```
+
+It needs `clang++` and compiles the tests with AddressSanitizer, which stops the program if the code reads or writes outside a buffer.
+
 ## User-Facing App
 
 The app, found in the `FP_Test` directory, targets Android 26 (Oreo). It depends on the [GraphView](https://github.com/jjoe64/GraphView) library. This app was developed in Android Studio with a focus on XXHDPI devices such as the Pixel 4; the interface may need updating on other devices.
