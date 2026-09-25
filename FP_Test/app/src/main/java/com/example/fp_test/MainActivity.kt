@@ -19,16 +19,15 @@ import com.jjoe64.graphview.DefaultLabelFormatter
 import com.jjoe64.graphview.GraphView
 import com.jjoe64.graphview.series.DataPoint
 import com.jjoe64.graphview.series.LineGraphSeries
-import java.io.EOFException
+import java.io.IOException
 import java.net.InetAddress
 import java.net.InetSocketAddress
-import java.net.SocketException
 import java.net.UnknownHostException
 import java.time.LocalDateTime
 import java.time.ZoneOffset
 import java.time.format.DateTimeFormatter
 import java.util.concurrent.ConcurrentHashMap
-import java.util.concurrent.ConcurrentLinkedQueue
+import java.util.concurrent.LinkedBlockingQueue
 import java.util.concurrent.atomic.AtomicInteger
 import java.util.concurrent.locks.Condition
 import java.util.concurrent.locks.ReentrantLock
@@ -43,6 +42,8 @@ class MainActivity : AppCompatActivity() {
     private var serverAddress: InetAddress? = null
     private var serverPort: Int? = null
     private var clientNeedsUpdate = false
+    // True while updateClient() is opening a new connection (guarded by networkLock).
+    private var clientConnecting = false
 
     /**
      * Sensor poll periods, in seconds. All periods must be divisible by
@@ -97,7 +98,7 @@ class MainActivity : AppCompatActivity() {
      * Queue for messages to send to the server. Associated networking logic is handled in
      * `handleConnection()`.
      */
-    private val serverMsgQueue: ConcurrentLinkedQueue<ServerMessage> = ConcurrentLinkedQueue()
+    private val serverMsgQueue: LinkedBlockingQueue<ServerMessage> = LinkedBlockingQueue() // take() sleeps while empty
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -114,39 +115,43 @@ class MainActivity : AppCompatActivity() {
     }
 
     /**
-     * Network logic to run in a separate thread: check for server commands in `cmdQueue`, then send
-     * the command to the server.
+     * Network logic to run in a separate thread: wait for server commands in `serverMsgQueue`, then
+     * send the command to the server. The network lock is held only to read the client, never while
+     * talking to the server, so a slow server cannot freeze the rest of the app.
      */
     private fun handleConnection() {
         while (true) {
-            networkLock.withLock {
-                val msg = serverMsgQueue.poll() ?: return@withLock
+            val msg = serverMsgQueue.take() // sleeps until a message is queued (the old loop spun at full speed)
 
+            var target: Client? = null // the client to use for this message
+            networkLock.withLock { // hold the lock only while reading the shared client
                 while (client == null) {
                     // TODO: Display a graphic somewhere on the screen while waiting to indicate
                     //       pending commands
-                    networkChanged.await()
+                    networkChanged.await() // wait until updateClient() has connected
                 }
+                target = client // remember the connected client
+            }
+            val activeClient = target ?: continue // skip this message if there is somehow no client
 
-                try {
-                    val response = client!!.sendCommand(msg)
-                    Log.d(TAG, "Sent to server: $msg (response=$response)")
+            try {
+                val response = activeClient.sendCommand(msg) // talk to the server without holding the lock
+                Log.d(TAG, "Sent to server: $msg (response=$response)")
 
-                    response?.processData { data, time ->
-                        val timeVal = time.toEpochSecond(ZoneOffset.UTC)
-                        val dataPoint = DataPoint(timeVal.toDouble(), data.toDouble())
-                        sensorDataSeries[msg.command]!!.appendData(dataPoint, false, maxGraphDataPoints)
-                        Log.d(TAG, "Plotted data: $dataPoint")
+                response?.processData { data, time ->
+                    val timeVal = time.toEpochSecond(ZoneOffset.UTC)
+                    val dataPoint = DataPoint(timeVal.toDouble(), data.toDouble())
+                    sensorDataSeries[msg.command]!!.appendData(dataPoint, false, maxGraphDataPoints)
+                    Log.d(TAG, "Plotted data: $dataPoint")
+                }
+            } catch (e: IOException) {
+                // Covers connection resets, closed sockets and timeouts.
+                Log.w(TAG, "Failed to send $msg: ${e.message}") // record why the command failed
+                networkLock.withLock { // ask updateClient() to open a fresh connection
+                    if (client === activeClient) { // only if the server was not changed in the meantime
+                        clientNeedsUpdate = true // request a rebuild of the client
+                        networkChanged.signalAll() // wake updateClient()
                     }
-                } catch (e: EOFException) {
-                    // Attempt to reconnect on EOF
-                    try {
-                        client!!.reconnect()
-                    } catch (e: SocketException) {
-                        // TODO: Handle server connect failure
-                    }
-                } catch (e: SocketException) {
-                    // TODO: Handle command send failure
                 }
             }
         }
@@ -155,34 +160,44 @@ class MainActivity : AppCompatActivity() {
     /**
      * Client configuration logic to run in a separate thread. This thread waits until the server
      * information has been changed, then disconnects the client from the old server and connects it
-     * to the new one.
+     * to the new one. The (slow) connect happens outside the network lock so the UI never waits on it.
      */
     private fun updateClient() {
         while (true) {
-            networkLock.withLock {
+            // Step 1 (locked): wait for a change request, then take a snapshot of what to connect to.
+            val (newAddr, newPort, oldClient) = networkLock.withLock {
                 while (!clientNeedsUpdate) {
-                    networkChanged.await()
+                    networkChanged.await() // sleep until configureServerAddress() or a failed send asks for a rebuild
                 }
+                clientNeedsUpdate = false // this request is now being handled
+                clientConnecting = true // tell waiting callers a connection attempt is in progress
+                val snapshot = Triple(serverAddress, serverPort, client) // copy the shared values
+                client = null // nobody may use the old client from now on
+                snapshot // return the copy to the code below
+            }
 
-                if (client?.isClosed != true) {
-                    client?.close()
+            // Step 2 (unlocked): close the old connection and open the new one.
+            oldClient?.close() // closing an already closed client is harmless
+            val newClient: Client? = if (newAddr == null || newPort == null) {
+                null // disconnect requested: there is no new client
+            } else {
+                try {
+                    Client(InetSocketAddress(newAddr, newPort)) // connects, giving up after the connect timeout
+                } catch (e: IOException) {
+                    Log.w(TAG, "Failed to connect to $newAddr:$newPort: ${e.message}") // record why it failed
+                    null // no usable client
                 }
+            }
 
-                val newAddr = serverAddress
-                val newPort = serverPort
-
-                if (newAddr == null || newPort == null) {
-                    client = null
+            // Step 3 (locked): publish the result and wake everyone who is waiting for it.
+            networkLock.withLock {
+                if (clientNeedsUpdate) {
+                    newClient?.close() // the server was changed again while connecting: discard this client
                 } else {
-                    try {
-                        client = Client(InetSocketAddress(newAddr, newPort))
-                        networkChanged.signalAll()
-                    } catch (e: SocketException) {
-                        // TODO: Handle client init failure
-                    }
+                    client = newClient // publish the new client (null if the connection failed)
                 }
-
-                clientNeedsUpdate = false
+                clientConnecting = false // the attempt is over, successful or not
+                networkChanged.signalAll() // always wake waiters, or they would wait forever after a failure
             }
         }
     }
@@ -526,8 +541,8 @@ class MainActivity : AppCompatActivity() {
             return
         }
 
-        if (port < 0) {
-            displayToast("Port number must be non-negative!")
+        if (port < 1 || port > 65535) { // valid TCP ports; Socket throws on anything else and would crash the app
+            displayToast("Port number must be between 1 and 65535!")
             return
         }
 
@@ -535,17 +550,20 @@ class MainActivity : AppCompatActivity() {
         configureServerAddress(ipAddr, port)
         displayToast("Connecting to server...")
 
-        networkLock.withLock {
-            while (clientNeedsUpdate) {
-                networkChanged.await()
-            }
+        // Wait for the connection attempt on a worker thread: blocking here would freeze the screen.
+        Thread {
+            var resultMsg = "Failed to connect to server" // assume failure until proven otherwise
+            networkLock.withLock {
+                while (clientNeedsUpdate || clientConnecting) {
+                    networkChanged.await() // sleep until updateClient() has finished
+                }
 
-            if (client?.isClosed == false) {
-                displayToast("Connected to server at $serverAddress:$serverPort")
-            } else {
-                displayToast("Failed to connect to server")
+                if (client?.isClosed == false) {
+                    resultMsg = "Connected to server at $serverAddress:$serverPort"
+                }
             }
-        }
+            runOnUiThread { displayToast(resultMsg) } // toasts may only be shown from the UI thread
+        }.start()
 
     }
 }
